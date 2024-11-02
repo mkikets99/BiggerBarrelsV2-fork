@@ -1,0 +1,9 @@
+name: BiggerBarrels
+version: '${version}'
+main: net.riches.biggerbarrels.BiggerBarrels
+api-version: 1.13
+softdepend:
+  - GriefPrevention
+  - CoreProtect
+  - Lands
+  - ChestShop

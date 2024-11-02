@@ -1,0 +1,82 @@
+plugins {
+    id 'java'
+}
+
+apply plugin: "maven-publish"
+
+group = 'net.riches'
+version = 'A.05-Lands-Update'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io"
+    }
+
+    maven {
+        url = "https://maven.playpro.com"
+    }
+
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.20-R0.1-SNAPSHOT'
+
+    compileOnly 'com.github.TechFortress:GriefPrevention:16.18.1'
+    compileOnly "com.github.angeschossen:LandsAPI:6.37.0"
+    compileOnly('net.coreprotect:coreprotect:21.3')
+    // jars in libs folder
+    compileOnly fileTree(dir: 'libs', include: '*.jar')
+}
+
+def targetJavaVersion = 17
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}
