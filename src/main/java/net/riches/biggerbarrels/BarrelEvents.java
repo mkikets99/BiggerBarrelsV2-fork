@@ -17,10 +17,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.HopperInventorySearchEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -42,12 +40,16 @@ public class BarrelEvents implements Listener {
         }
     }
 
-    @EventHandler(priority = org.bukkit.event.EventPriority.HIGHEST)
-    public void onHopperItemMove(InventoryMoveItemEvent e) {
-        if (e.getSource().getType().equals(InventoryType.HOPPER) && e.getDestination().getType().equals(InventoryType.BARREL))
-            BiggerBarrels.getInstance().getBarrel(Objects.requireNonNull(e.getDestination().getLocation()).getBlock()).addItem(e.getItem());
-        else if (e.getSource().getType().equals(InventoryType.BARREL) && e.getDestination().getType().equals(InventoryType.HOPPER))
-            BiggerBarrels.getInstance().getBarrel(Objects.requireNonNull(e.getSource().getLocation()).getBlock()).removeItem(e.getItem());
+    @EventHandler
+    public void onHopperInventorySearch(HopperInventorySearchEvent event) {
+        Block searchBlock = event.getSearchBlock();
+
+        if (BiggerBarrels.getInstance().getBarrel(searchBlock) != null) {
+            if (event.getContainerType() == HopperInventorySearchEvent.ContainerType.SOURCE || event.getContainerType() == HopperInventorySearchEvent.ContainerType.DESTINATION) {
+                Inventory customInventory = BiggerBarrels.getInstance().getBarrel(searchBlock);
+                event.setInventory(customInventory);
+            }
+        }
     }
 
     @EventHandler
@@ -69,7 +71,7 @@ public class BarrelEvents implements Listener {
                         if (cart.getInventory().firstEmpty() == -1 && Objects.requireNonNull(cart.getInventory().getItem(4)).getAmount() == 64) {
                             return;
                         }
-                        ItemStack itemToMove = contents.getFirst();
+                        ItemStack itemToMove = contents.getFirst(); // Get the first item in the barrel
                         itemToMove.setAmount(1); // Move only one item
                         cart.getInventory().addItem(itemToMove);
                         barrelInv.removeItem(itemToMove);
@@ -77,34 +79,6 @@ public class BarrelEvents implements Listener {
                 }
             }
         }
-    }
-
-
-
-    @EventHandler
-    public void onBlockPlace(BlockPlaceEvent e) {
-//        Block barrel;
-//        Inventory inventory;
-//
-//        if (e.getBlock().getType() == Material.BARREL) {
-//            if (e.getBlock().getLocation().clone().subtract(0, 1, 0).getBlock().getType() != Material.HOPPER)
-//                return;
-//
-//            barrel = e.getBlock().getLocation().clone().subtract(0, 1, 0).getBlock();
-//
-//            inventory = BiggerBarrels.getInstance().getBarrel(e.getBlock());
-//            if (inventory == null) return;
-//        }
-//        else if (e.getBlock().getType() == Material.HOPPER) {
-//            if (e.getBlock().getLocation().clone().add(0, 1, 0).getBlock().getType() != Material.BARREL)
-//                return;
-//
-//            barrel = e.getBlock().getLocation().clone().add(0, 1, 0).getBlock();
-//
-//            inventory = BiggerBarrels.getInstance().getBarrel(barrel);
-//            if (inventory == null) return;
-//        }
-//        else return;
     }
 
     @EventHandler
