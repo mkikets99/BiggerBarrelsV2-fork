@@ -44,11 +44,20 @@ public class BarrelEvents implements Listener {
     public void onHopperInventorySearch(HopperInventorySearchEvent event) {
         Block searchBlock = event.getSearchBlock();
 
-        if (BiggerBarrels.getInstance().getBarrel(searchBlock) != null) {
-            if (event.getContainerType() == HopperInventorySearchEvent.ContainerType.SOURCE || event.getContainerType() == HopperInventorySearchEvent.ContainerType.DESTINATION) {
-                Inventory customInventory = BiggerBarrels.getInstance().getBarrel(searchBlock);
-                event.setInventory(customInventory);
-            }
+        // Only override when pulling from our custom barrel
+        if (event.getContainerType() == HopperInventorySearchEvent.ContainerType.SOURCE
+                && BiggerBarrels.getInstance().getBarrel(searchBlock) != null
+                && searchBlock.getType() == Material.BARREL) {
+
+            Inventory customInventory = BiggerBarrels.getInstance().getBarrel(searchBlock);
+            event.setInventory(customInventory);
+        }
+        if (event.getContainerType() == HopperInventorySearchEvent.ContainerType.DESTINATION
+                && BiggerBarrels.getInstance().getBarrel(searchBlock) != null
+                && searchBlock.getType() == Material.BARREL) {
+
+            Inventory customInventory = BiggerBarrels.getInstance().getBarrel(searchBlock);
+            event.setInventory(customInventory);
         }
     }
 
